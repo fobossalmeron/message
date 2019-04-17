@@ -1,0 +1,62 @@
+html{
+  text-align: center;
+}
+input, textarea{
+  font-size: 6rem;
+  font-weight: bold;
+  width: 100%;
+  height: 90%;
+  max-width: 1200px;
+  background-color: transparent;
+  text-align: center;
+  white-space: normal;
+  overflow: visible;
+  resize: none;
+  vertical-align: middle;
+  padding: 0;
+  border: 0;
+  margin: 5% 0 0 0;
+  &:focus{
+    border:none;
+    outline:none;
+  }
+}
+
+.circle-picker {
+  flex-wrap: nowrap !important;
+  width: auto !important;
+  margin-bottom: 20px !important;
+  background-color: white;
+  padding: 12px 0px 0px 14px;
+  border-radius: 30px;
+  margin-right: 0 !important;
+}
+
+//Loader
+.app-fade-in {
+    opacity: 0;
+    transition: opacity .3s ease-in;
+    display: flex;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+.app-fade-in.visible {
+    transition: opacity .3s ease-in;
+    opacity: 1;
+}
+
+.loader-fade-out {
+    opacity: 1;
+    width: 300px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+
+    &.invisible {
+        transition: opacity .2s ease-in;
+        opacity: 0;
+    }
+}
