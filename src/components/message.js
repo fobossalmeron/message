@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
 import "emoji-mart/css/emoji-mart.css";
-import { Picker } from "emoji-mart";
+import data from "emoji-mart/data/apple.json";
+import { NimblePicker } from "emoji-mart";
 import styled, { css } from "styled-components/macro";
+import Clipboard from "react-clipboard.js";
 
 import { WhatsappShareButton, WhatsappIcon } from "react-share";
 
@@ -25,7 +27,7 @@ const TextArea = styled.textarea`
   overflow: visible;
   resize: none;
   vertical-align: middle;
-  padding: 5% 15%;
+  padding: 10% 15%;
   box-sizing: border-box;
   border: 0;
   margin: 0;
@@ -43,6 +45,7 @@ const Options = styled.div`
   justify-content: space-around;
   right: 0;
   width: ${props => (props.reduced ? "85%" : "100%")};
+  margin-bottom: 20px;
 `;
 
 const OptionsButton = styled.button`
@@ -54,8 +57,26 @@ const OptionsButton = styled.button`
   font-weight: bold;
   transition: 0.4s ease all;
   border: none;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
   outline: none;
+  :hover {
+    text-decoration: underline;
+  }
+`;
+
+const TopButton = styled(Clipboard)`
+  cursor: pointer;
+  padding: 6px 10px 8px 10px;
+  background-color: "white";
+  color: ${props => props.color || "#3f51b5"};
+  border-radius: 0 20px 20px 0;
+  font-weight: bold;
+  transition: 0.4s ease all;
+  border: none;
+  margin-bottom: 0px;
+  outline: none;
+  margin-left: 15px;
+
   :hover {
     text-decoration: underline;
   }
@@ -63,7 +84,7 @@ const OptionsButton = styled.button`
     props.disabled &&
     css`
       background-color: transparent;
-      border: 1px solid white;
+      border-left: 1px solid white;
       color: white;
       cursor: default;
       :hover {
@@ -125,14 +146,17 @@ const Linked = styled.div`
   position: absolute;
   top: 20px;
   margin: 0;
-  width: 100%;
+  width: auto;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  margin:0;
-  p{
-    margin:0%;
+  margin: 0;
+  border: 1px solid white;
+  border-radius: 20px;
+  padding: 0 0 0 20px;
+  p {
+    margin: 0%;
   }
 `;
 
@@ -173,12 +197,12 @@ export default function Message(props) {
   const [copySuccess, setCopySuccess] = useState(false);
   const textAreaRef = useRef(null);
 
-  function copyToClipboard(e) {
-    textAreaRef.current.select();
-    document.execCommand("copy");
+  function copyToClipboard() {
+    //textAreaRef.current.select();
+    //document.execCommand("copy");
     // This is just personal preference.
     // I prefer to not show the the whole text area selected.
-    e.target.focus();
+    //e.target.focus();
     setCopySuccess(true);
     setTimeout(() => {
       setCopySuccess(false);
@@ -246,9 +270,11 @@ export default function Message(props) {
             x
           </EmojiHider>
           <EmojiContainer>
-            <Picker
+            <NimblePicker
               onSelect={emoji => addEmoji(emoji)}
+              data={data}
               set="apple"
+              include="people"
               title="Pick your emoji…"
               emoji="star-struck"
             />
@@ -258,20 +284,16 @@ export default function Message(props) {
       {activatedEmoji ? (
         <Linked>
           <p>{"http://andjust.fyi/" + transformTextToURL(inputMessage)}</p>
-
-          {/* Logical shortcut for only displaying the 
-          button if the copy command exists */
-          document.queryCommandSupported("copy") && (
-            <div>
-              <OptionsButton
-                onClick={copyToClipboard}
-                color={inputColor}
-                disabled={copySuccess}
-              >
-                {copySuccess ? "Copied to clipboard!" : "Copy URL"}
-              </OptionsButton>
-            </div>
-          )}
+          <TopButton
+            onClick={copyToClipboard}
+            data-clipboard-text={
+              "http://andjust.fyi/" + transformTextToURL(inputMessage)
+            }
+            color={inputColor}
+            disabled={copySuccess}
+          >
+            {copySuccess ? "Copied to clipboard!" : "Copy URL"}
+          </TopButton>
         </Linked>
       ) : null}
       <TextArea
