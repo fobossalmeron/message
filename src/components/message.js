@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
-import styled from "styled-components";
+import styled, { css } from "styled-components/macro";
 
-import {
-  WhatsappShareButton,
-  WhatsappIcon,
-} from "react-share";
+import { WhatsappShareButton, WhatsappIcon } from "react-share";
 
 const Container = styled.div`
   width: 100%;
@@ -51,7 +48,7 @@ const Options = styled.div`
 const OptionsButton = styled.button`
   cursor: pointer;
   padding: 6px 10px 8px 10px;
-  background-color: white;
+  background-color: "white";
   color: ${props => props.color || "#3f51b5"};
   border-radius: 10px;
   font-weight: bold;
@@ -62,6 +59,18 @@ const OptionsButton = styled.button`
   :hover {
     text-decoration: underline;
   }
+  ${props =>
+    props.disabled &&
+    css`
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      cursor: default;
+      :hover {
+        text-decoration: none;
+        cursor: default;
+      }
+    `}
 `;
 
 const EmojiHider = styled.span`
@@ -79,11 +88,13 @@ const EmojiHider = styled.span`
   padding: 2px 0 0 1px;
   box-sizing: border-box;
   cursor: pointer;
+  z-index: 3;
 `;
 
 const EmojiContainer = styled.div`
   .emoji-mart {
     width: 15%;
+    z-index: 3;
     left: 0;
     height: 100vh;
     top: 0;
@@ -107,6 +118,22 @@ const ShareContainer = styled.div`
   height: 100%;
   box-sizing: border-box;
   right: 0;
+`;
+
+const Linked = styled.div`
+  font-size: 1rem;
+  position: absolute;
+  top: 20px;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  margin:0;
+  p{
+    margin:0%;
+  }
 `;
 
 const Colors = [
@@ -133,14 +160,34 @@ export default function Message(props) {
   const { message } = props.match.params;
 
   const [inputMessage, setValue] = useState(transformURLToText(message));
-  const [inputColor, setColor] = useState(
+
+  const [showEmoji, setEmoji] = useState(false);
+  const [activatedEmoji, setActivatedEmoji] = useState(false);
+
+  const [showShare, setShare] = useState(false);
+
+  const [inputColor, setInputColor] = useState(
     Colors[Math.floor(Math.random() * Colors.length)]
   );
-  const [showEmoji, setEmoji] = useState(false);
-  const [showShare, setShare] = useState(false);
+
+  const [copySuccess, setCopySuccess] = useState(false);
+  const textAreaRef = useRef(null);
+
+  function copyToClipboard(e) {
+    textAreaRef.current.select();
+    document.execCommand("copy");
+    // This is just personal preference.
+    // I prefer to not show the the whole text area selected.
+    e.target.focus();
+    setCopySuccess(true);
+    setTimeout(() => {
+      setCopySuccess(false);
+    }, 2000);
+  }
 
   function handleEmoji(bool) {
     setEmoji(bool);
+    setActivatedEmoji(true);
   }
 
   function handleShare(bool) {
@@ -196,7 +243,7 @@ export default function Message(props) {
       {showEmoji ? (
         <div style={{ position: "relative" }}>
           <EmojiHider color={inputColor} onClick={() => handleEmoji(false)}>
-            ✗
+            x
           </EmojiHider>
           <EmojiContainer>
             <Picker
@@ -208,8 +255,28 @@ export default function Message(props) {
           </EmojiContainer>
         </div>
       ) : null}
+      {activatedEmoji ? (
+        <Linked>
+          <p>{"http://andjust.fyi/" + transformTextToURL(inputMessage)}</p>
+
+          {/* Logical shortcut for only displaying the 
+          button if the copy command exists */
+          document.queryCommandSupported("copy") && (
+            <div>
+              <OptionsButton
+                onClick={copyToClipboard}
+                color={inputColor}
+                disabled={copySuccess}
+              >
+                {copySuccess ? "Copied to clipboard!" : "Copy URL"}
+              </OptionsButton>
+            </div>
+          )}
+        </Linked>
+      ) : null}
       <TextArea
         emojified={showEmoji}
+        ref={textAreaRef}
         type="text"
         id="inputArea"
         value={inputMessage}
@@ -227,7 +294,7 @@ export default function Message(props) {
           </EmojiHider>
           <div className="Demo__some-network">
             <WhatsappShareButton
-              url={"localhost:3000/" + transformTextToURL(inputMessage)}
+              url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
               className="Demo__some-network__share-button"
             >
               <WhatsappIcon size={52} round />
