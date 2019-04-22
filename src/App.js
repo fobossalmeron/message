@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import ReactGA from 'react-ga';
 import Loader from "./components/loader";
 import Message from "./components/message";
+import styled from "styled-components";
 
-import "./App.scss";
+ReactGA.initialize('UA-65251724-3');
+ReactGA.pageview(window.location.pathname + window.location.search);
 
-function App(props) {
+//Loader
+const Wrapper = styled.div`
+  opacity: ${props => (props.visible ? "1" : "0")};
+  transition: opacity .3s ease-in;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+`
+
+function App() {
   const [hasLoaded, setLoaded] = useState(false);
   useEffect(() => {
     setTimeout(() => {
@@ -20,35 +28,20 @@ function App(props) {
 
   return (
     <div className="App">
-      <Loader class={`loader-fade-out ${hasLoaded && "invisible"}`} />
-      <div className={`app-fade-in ${hasLoaded && "visible"}`}>
+      <Loader invisible={hasLoaded} />
+      <Wrapper visible={hasLoaded}>
         <Router>
           <Route
             render={({ location }) => {
               return (
                 <Switch location={location}>
-                  <Route
-                    exact
-                    path="/"
-                    render={() => <Redirect to="/3f51b5/Escribe+tu+mensaje" />}
-                  />
-                  <Route
-                    exact
-                    path="/message"
-                    render={() => <Redirect to="/3f51b5/Escribe+tu+mensaje" />}
-                  />
-                  <Route
-                    name="home"
-                    path="/:color/:message"
-                    component={Message}
-                  />
-                  <Route name="home" path="/:color?" component={Message} />
+                  <Route name="home" path="/:message?" component={Message} />
                 </Switch>
               );
             }}
           />
         </Router>
-      </div>
+      </Wrapper>
     </div>
   );
 }
