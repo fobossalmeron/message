@@ -6,6 +6,6 @@ Wouldn’t it be nice to have a link destined just for you?<br>
 Wouldn't it make you feel special? <br>
 Well now you can.<br>
 <br>
-[![And Just FYI](https://img.youtube.com/vi/nsHpj5FJXjI/0.jpg)](https://www.youtube.com/watch?v=nsHpj5FJXjI)
-<br>
+[![And Just FYI](https://img.youtube.com/vi/bB_dpFhp6ik/0.jpg)](https://www.youtube.com/watch?v=bB_dpFhp6ik)
+<br><br>
 This project is hosted on http://andjust.fyi but feel free to clone it and host it anywhere you want to further personalize the message or change languages.
