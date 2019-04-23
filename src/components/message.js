@@ -5,7 +5,15 @@ import { NimblePicker } from "emoji-mart";
 import styled, { css } from "styled-components/macro";
 import Clipboard from "react-clipboard.js";
 
-import { WhatsappShareButton, WhatsappIcon } from "react-share";
+import { ReactComponent as TwitterIcon } from "./../assets/img/twitter.svg";
+import { ReactComponent as WhatsappIcon } from "./../assets/img/whatsapp.svg";
+import { ReactComponent as FacebookIcon } from "./../assets/img/facebook.svg";
+
+import {
+  WhatsappShareButton,
+  TwitterShareButton,
+  FacebookShareButton
+} from "react-share";
 
 const Container = styled.div`
   width: 100%;
@@ -43,9 +51,9 @@ const Options = styled.div`
   min-height: 30px;
   display: flex;
   justify-content: space-around;
-  right: 0;
+  left: 0;
   width: ${props => (props.reduced ? "85%" : "100%")};
-  margin-bottom: 20px;
+  height: 60px;
 `;
 
 const OptionsButton = styled.button`
@@ -53,12 +61,14 @@ const OptionsButton = styled.button`
   padding: 6px 10px 8px 10px;
   background-color: "white";
   color: ${props => props.color || "#3f51b5"};
-  border-radius: 10px;
   font-weight: bold;
   transition: 0.4s ease all;
   border: none;
-  margin-bottom: 0px;
+  bottom: 50px;
+  padding: 6px 15px 8px 15px;
   outline: none;
+  position: absolute;
+  border-radius: 20px;
   :hover {
     text-decoration: underline;
   }
@@ -127,7 +137,13 @@ const EmojiContainer = styled.div`
     margin-bottom: 4px;
   }
   .emoji-mart-scroll {
-    height: 83%;
+    height: 100%;
+    padding: 5%;
+  }
+  .emoji-mart-category-label,
+  .emoji-mart-bar,
+  .emoji-mart-search {
+    display: none;
   }
 `;
 
@@ -139,6 +155,9 @@ const ShareContainer = styled.div`
   height: 100%;
   box-sizing: border-box;
   right: 0;
+  .SocialMediaShareButton {
+    max-width: 50px;
+  }
 `;
 
 const Linked = styled.div`
@@ -157,6 +176,7 @@ const Linked = styled.div`
   padding: 0 0 0 20px;
   p {
     margin: 0%;
+    text-decoration: underline;
   }
 `;
 
@@ -198,11 +218,6 @@ export default function Message(props) {
   const textAreaRef = useRef(null);
 
   function copyToClipboard() {
-    //textAreaRef.current.select();
-    //document.execCommand("copy");
-    // This is just personal preference.
-    // I prefer to not show the the whole text area selected.
-    //e.target.focus();
     setCopySuccess(true);
     setTimeout(() => {
       setCopySuccess(false);
@@ -274,9 +289,25 @@ export default function Message(props) {
               onSelect={emoji => addEmoji(emoji)}
               data={data}
               set="apple"
-              include="people"
+              include={["recent"]}
               title="Pick your emoji…"
               emoji="star-struck"
+              perLine="4"
+              sheetSize={64}
+              showPreview={true}
+              showSkinTones={false}
+              color={inputColor}
+              emojiSize={40}
+              recent={[
+                "+1",
+                "grinning",
+                "kissing_heart",
+                "kissing_closed_eyes",
+                "thinking_face",
+                ":smiley:",
+                ":scream:",
+                ":hugging_face:"
+              ]}
             />
           </EmojiContainer>
         </div>
@@ -312,24 +343,39 @@ export default function Message(props) {
             color={inputColor}
             onClick={() => handleShare(false)}
           >
-            ✗
+            x
           </EmojiHider>
-          <div className="Demo__some-network">
-            <WhatsappShareButton
-              url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
-              className="Demo__some-network__share-button"
-            >
-              <WhatsappIcon size={52} round />
-            </WhatsappShareButton>
-          </div>
+          <WhatsappShareButton
+            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+          >
+            <WhatsappIcon />
+          </WhatsappShareButton>
+          <TwitterShareButton
+            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+          >
+            <TwitterIcon />
+          </TwitterShareButton>
+          <FacebookShareButton
+            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+          >
+            <FacebookIcon />
+          </FacebookShareButton>
         </ShareContainer>
       ) : null}
-      <Options reduced={showEmoji}>
-        {showEmoji ? null : (
-          <OptionsButton color={inputColor} onClick={() => handleEmoji(true)}>
-            add emoji
-          </OptionsButton>
-        )}
+      <Options reduced={showShare}>
+        <Linked>
+          <p>{"http://andjust.fyi/" + transformTextToURL(inputMessage)}</p>
+          <TopButton
+            onClick={copyToClipboard}
+            data-clipboard-text={
+              "http://andjust.fyi/" + transformTextToURL(inputMessage)
+            }
+            color={inputColor}
+            disabled={copySuccess}
+          >
+            {copySuccess ? "Copied to clipboard!" : "Copy URL"}
+          </TopButton>
+        </Linked>
         {showShare ? null : (
           <OptionsButton color={inputColor} onClick={() => handleShare(true)}>
             share
