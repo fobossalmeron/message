@@ -1,13 +1,12 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "emoji-mart/css/emoji-mart.css";
-import data from "emoji-mart/data/apple.json";
-import { NimblePicker } from "emoji-mart";
 import styled, { css } from "styled-components/macro";
 import Clipboard from "react-clipboard.js";
 
 import { ReactComponent as TwitterIcon } from "./../assets/img/twitter.svg";
 import { ReactComponent as WhatsappIcon } from "./../assets/img/whatsapp.svg";
 import { ReactComponent as FacebookIcon } from "./../assets/img/facebook.svg";
+import { ReactComponent as GitHubIcon } from "./../assets/img/github.svg";
 
 import {
   WhatsappShareButton,
@@ -19,14 +18,19 @@ const Container = styled.div`
   width: 100%;
   background-color: ${props => props.background || "#3f51b5"};
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  h1 {
+    font-size: 5rem;
+    margin: 5% 0 0 0;
+  }
 `;
 
 const TextArea = styled.textarea`
   width: ${props => (props.emojified ? "85%" : "100%")};
-  font-size: 6rem;
+  font-size: 5rem;
+  caret-color: white;
   font-weight: bold;
   height: 100%;
   background-color: transparent;
@@ -35,7 +39,7 @@ const TextArea = styled.textarea`
   overflow: visible;
   resize: none;
   vertical-align: middle;
-  padding: 10% 15%;
+  padding: 0 15% 10% 15%;
   box-sizing: border-box;
   border: 0;
   margin: 0;
@@ -48,27 +52,28 @@ const TextArea = styled.textarea`
 const Options = styled.div`
   position: absolute;
   bottom: 0;
-  min-height: 30px;
+  min-height: 60px;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
   left: 0;
   width: ${props => (props.reduced ? "85%" : "100%")};
-  height: 60px;
 `;
 
 const OptionsButton = styled.button`
   cursor: pointer;
-  padding: 6px 10px 8px 10px;
+  padding: 8px 15px 8px 15px;
   background-color: "white";
   color: ${props => props.color || "#3f51b5"};
-  font-weight: bold;
   transition: 0.4s ease all;
   border: none;
-  bottom: 50px;
-  padding: 6px 15px 8px 15px;
   outline: none;
-  position: absolute;
+  position: relative;
   border-radius: 20px;
+  max-width: 100px;
+  margin-bottom: 15px;
   :hover {
     text-decoration: underline;
   }
@@ -76,11 +81,10 @@ const OptionsButton = styled.button`
 
 const TopButton = styled(Clipboard)`
   cursor: pointer;
-  padding: 6px 10px 8px 10px;
+  padding: 6px 13px 7px 10px;
   background-color: "white";
   color: ${props => props.color || "#3f51b5"};
   border-radius: 0 20px 20px 0;
-  font-weight: bold;
   transition: 0.4s ease all;
   border: none;
   margin-bottom: 0px;
@@ -104,66 +108,29 @@ const TopButton = styled(Clipboard)`
     `}
 `;
 
-const EmojiHider = styled.span`
-  color: ${props => props.color || "#3f51b5"};
+const GitHubContainer = styled.div`
   position: absolute;
-  right: ${props => (props.inverted ? "unset" : "-45px")};
-  left: ${props => (props.inverted ? "-45px" : "unset")};
-  font-size: 23px;
-  font-weight: bold;
-  background-color: white;
-  border-radius: 100%;
-  top: 12px;
-  width: 31px;
-  height: 31px;
-  padding: 2px 0 0 1px;
-  box-sizing: border-box;
-  cursor: pointer;
-  z-index: 3;
-`;
-
-const EmojiContainer = styled.div`
-  .emoji-mart {
-    width: 15%;
-    z-index: 3;
-    left: 0;
-    height: 100vh;
-    top: 0;
-    position: relative;
-    border: 0;
-    border-radius: 0;
+  left: 0;
+  bottom: 0;
+  margin: 20px;
+  :hover {
+    svg {
+      transform: scale(1.1);
+    }
   }
-  .emoji-mart-category-label {
-    margin-bottom: 4px;
-  }
-  .emoji-mart-scroll {
-    height: 100%;
-    padding: 5%;
-  }
-  .emoji-mart-category-label,
-  .emoji-mart-bar,
-  .emoji-mart-search {
-    display: none;
-  }
-`;
-
-const ShareContainer = styled.div`
-  padding: 20px;
-  background-color: white;
-  position: relative;
-  width: 8%;
-  height: 100%;
-  box-sizing: border-box;
-  right: 0;
-  .SocialMediaShareButton {
-    max-width: 50px;
+  svg {
+    width: 30px;
+    height: 30px;
+    transition: 0.4s ease all;
+    path {
+      fill: white;
+    }
   }
 `;
 
 const Linked = styled.div`
   font-size: 1rem;
-  position: absolute;
-  top: 20px;
+  position: relative;
   margin: 0;
   width: auto;
   display: flex;
@@ -180,53 +147,55 @@ const Linked = styled.div`
   }
 `;
 
-const Colors = [
-  "#f44336",
-  "#e91e63",
-  "#9c27b0",
-  "#673ab7",
-  "#3f51b5",
-  "#2196f3",
-  "#03a9f4",
-  "#00bcd4",
-  "#009688",
-  "#4caf50",
-  "#8bc34a",
-  "#cddc39",
-  "#ffeb3b",
-  "#ffc107",
-  "#ff9800",
-  "#ff5722",
-  "#607d8b"
-];
+const ShareContainer = styled.div`
+  padding: 20px;
+  position: relative;
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  .SocialMediaShareButton {
+    max-width: 50px;
+    cursor:pointer;
+    :hover {
+    svg {
+      transform: scale(1.1);
+    }
+  }
+    svg {
+      width: 100%;
+      height: 100%;
+      transition: .4s ease all;
+    }
+  }
+`;
 
 export default function Message(props) {
   const { message } = props.match.params;
+  const inputColor = props.color;
 
   const [inputMessage, setValue] = useState(transformURLToText(message));
 
-  const [showEmoji, setEmoji] = useState(false);
-  const [activatedEmoji, setActivatedEmoji] = useState(false);
-
   const [showShare, setShare] = useState(false);
 
-  const [inputColor, setInputColor] = useState(
-    Colors[Math.floor(Math.random() * Colors.length)]
-  );
-
   const [copySuccess, setCopySuccess] = useState(false);
-  const textAreaRef = useRef(null);
+
+  const inputEl = useRef(null);
+
+  useEffect(() => {
+    // Update the document title using the browser API
+    inputEl.current.focus();
+
+  });
 
   function copyToClipboard() {
     setCopySuccess(true);
     setTimeout(() => {
       setCopySuccess(false);
     }, 2000);
-  }
-
-  function handleEmoji(bool) {
-    setEmoji(bool);
-    setActivatedEmoji(true);
+    console.log("es el long " + isItTooLong());
   }
 
   function handleShare(bool) {
@@ -243,7 +212,7 @@ export default function Message(props) {
         .replace(/hashtag-/g, "#")
         .replace(/percent-/g, "%");
     } else {
-      var defaultMessage = "Write your message";
+      var defaultMessage = "";
       return defaultMessage;
     }
   }
@@ -270,101 +239,55 @@ export default function Message(props) {
     }
   }
 
-  function addEmoji(emoji) {
-    var oldMessage = inputMessage;
-    var editedInputMessage = (oldMessage += emoji.native);
-    setValue(editedInputMessage);
-    props.history.push(transformTextToURL(editedInputMessage));
+  function isItTooLong() {
+    var less = transformTextToURL(inputMessage);
+    if (less.length >= 30) {
+      less = less.substring(0, 30) + "...";
+    }
+    return less;
   }
+
+  const linkBottom = "http://andjust.fyi/" + isItTooLong();
 
   return (
     <Container background={inputColor}>
-      {showEmoji ? (
-        <div style={{ position: "relative" }}>
-          <EmojiHider color={inputColor} onClick={() => handleEmoji(false)}>
-            x
-          </EmojiHider>
-          <EmojiContainer>
-            <NimblePicker
-              onSelect={emoji => addEmoji(emoji)}
-              data={data}
-              set="apple"
-              include={["recent"]}
-              title="Pick your emoji…"
-              emoji="star-struck"
-              perLine="4"
-              sheetSize={64}
-              showPreview={true}
-              showSkinTones={false}
-              color={inputColor}
-              emojiSize={40}
-              recent={[
-                "+1",
-                "grinning",
-                "kissing_heart",
-                "kissing_closed_eyes",
-                "thinking_face",
-                ":smiley:",
-                ":scream:",
-                ":hugging_face:"
-              ]}
-            />
-          </EmojiContainer>
-        </div>
-      ) : null}
-      {activatedEmoji ? (
-        <Linked>
-          <p>{"http://andjust.fyi/" + transformTextToURL(inputMessage)}</p>
-          <TopButton
-            onClick={copyToClipboard}
-            data-clipboard-text={
-              "http://andjust.fyi/" + transformTextToURL(inputMessage)
-            }
-            color={inputColor}
-            disabled={copySuccess}
-          >
-            {copySuccess ? "Copied to clipboard!" : "Copy URL"}
-          </TopButton>
-        </Linked>
-      ) : null}
+      <h1>And just fyi...</h1>
       <TextArea
-        emojified={showEmoji}
-        ref={textAreaRef}
+        ref={inputEl} 
+        autoFocus={true}
         type="text"
         id="inputArea"
         value={inputMessage}
         onChange={updateInputMessage}
         onClick={cleanMessage}
       />
-      {showShare ? (
-        <ShareContainer>
-          <EmojiHider
-            inverted
-            color={inputColor}
-            onClick={() => handleShare(false)}
-          >
-            x
-          </EmojiHider>
-          <WhatsappShareButton
-            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
-          >
-            <WhatsappIcon />
-          </WhatsappShareButton>
-          <TwitterShareButton
-            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
-          >
-            <TwitterIcon />
-          </TwitterShareButton>
-          <FacebookShareButton
-            url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
-          >
-            <FacebookIcon />
-          </FacebookShareButton>
-        </ShareContainer>
-      ) : null}
-      <Options reduced={showShare}>
+      <Options>
+        {showShare ? (
+          <ShareContainer>
+            <WhatsappShareButton
+              url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+            >
+              <WhatsappIcon />
+            </WhatsappShareButton>
+            <TwitterShareButton
+              url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+            >
+              <TwitterIcon />
+            </TwitterShareButton>
+            <FacebookShareButton
+              url={"http://andjust.fyi/" + transformTextToURL(inputMessage)}
+            >
+              <FacebookIcon />
+            </FacebookShareButton>
+          </ShareContainer>
+        ) : null}
+        {showShare ? null : (
+          <OptionsButton color={inputColor} onClick={() => handleShare(true)}>
+            Share
+          </OptionsButton>
+        )}
         <Linked>
-          <p>{"http://andjust.fyi/" + transformTextToURL(inputMessage)}</p>
+          <p>{linkBottom}</p>
           <TopButton
             onClick={copyToClipboard}
             data-clipboard-text={
@@ -376,12 +299,12 @@ export default function Message(props) {
             {copySuccess ? "Copied to clipboard!" : "Copy URL"}
           </TopButton>
         </Linked>
-        {showShare ? null : (
-          <OptionsButton color={inputColor} onClick={() => handleShare(true)}>
-            share
-          </OptionsButton>
-        )}
       </Options>
+      <GitHubContainer>
+        <a href="https://github.com/fobossalmeron/message">
+          <GitHubIcon />
+        </a>
+      </GitHubContainer>
     </Container>
   );
 }

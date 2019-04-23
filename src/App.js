@@ -18,7 +18,29 @@ const Wrapper = styled.div`
   height: 100vh;
 `
 
+const Colors = [
+  "#f44336",
+  "#e91e63",
+  "#9c27b0",
+  "#673ab7",
+  "#3f51b5",
+  "#2196f3",
+  "#03a9f4",
+  "#00bcd4",
+  "#009688",
+  "#4caf50",
+  "#8bc34a",
+  "#cddc39",
+  "#ffc107",
+  "#ff9800",
+  "#ff5722",
+  "#607d8b"
+];
+
 function App() {
+  const [inputColor, setInputColor] = useState(
+    Colors[Math.floor(Math.random() * Colors.length)]
+  );
   const [hasLoaded, setLoaded] = useState(false);
   useEffect(() => {
     setTimeout(() => {
@@ -28,14 +50,15 @@ function App() {
 
   return (
     <div className="App">
-      <Loader invisible={hasLoaded} />
+      <Loader invisible={hasLoaded}/>
       <Wrapper visible={hasLoaded}>
         <Router>
           <Route
             render={({ location }) => {
               return (
                 <Switch location={location}>
-                  <Route name="home" path="/:message?" component={Message} />
+                  <Route name="home" path="/:message?"   render={(props) => <Message {...props} color={inputColor} />}
+ />
                 </Switch>
               );
             }}

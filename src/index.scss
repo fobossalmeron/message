@@ -1,5 +1,7 @@
 @import "~normalize.css/normalize.css";
-@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:900');
+
+
 
 html{
   text-align: center;
@@ -8,7 +10,7 @@ html{
 body {
   margin: 0;
   padding: 0;
-  font-family: 'PT Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
